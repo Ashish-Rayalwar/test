@@ -53,6 +53,7 @@ function App() {
   const [title, setTitle] = useState("");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
   function addTocart(file) {
     setCart([...new Set([...cart, file])]);
   }

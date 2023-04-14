@@ -30,6 +30,20 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+// const downloadFileVerify = async (req,res,next)=>{
+//   const userId = req.tokenDetails.userId;
+
+//   const tokenId = req.params.token;
+//     JWT.verify(tokenId, process.env.JWTB, (err, userDetails) => {
+//       if (err) {
+//         return res.status(403).send({ status: false, message: err.message });
+//       }
+
+//       req.tokenDetails = tokenDetails;
+//       next();
+//     });
+// }
+
 const AdminAuthorization = async (req, res, next) => {
   try {
     verifyToken(req, res, async () => {

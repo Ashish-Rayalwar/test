@@ -25,7 +25,7 @@ router.get("/file/download/:token", verifyToken, getDownload);
 router.all("/*", (req, res) => {
   return res.status(404).send({
     status: false,
-    msg: "This API request is not available! FileRoute",
+    message: "This API request is not available! FileRoute",
   });
 });
 
