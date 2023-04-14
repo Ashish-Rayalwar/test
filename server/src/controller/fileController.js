@@ -12,9 +12,10 @@ const { isValidTitle } = require("../validations/validator");
 const createFile = async (req, res) => {
   try {
     let data = req.body;
-
-    const responce = await fileValidation.validateAsync(data);
+    console.log(data);
     const files = req.files;
+    console.log(files);
+    const responce = await fileValidation.validateAsync(data);
     if (files.length === 0 || files.length < 2)
       return res.status(400).json({ message: "provide file and image" });
 

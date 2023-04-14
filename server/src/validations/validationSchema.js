@@ -4,7 +4,7 @@ const Joi = require("joi");
 // const JoiPassword = Joi.extend(joiPasswordExtendCore);
 
 const userValidation = Joi.object({
-  name: Joi.string().min(4).max(10).required().lowercase(),
+  name: Joi.string().min(3).max(10).required().lowercase(),
   email: Joi.string().required().email().lowercase(),
   password: Joi.string().max(15).min(7).required(),
 });

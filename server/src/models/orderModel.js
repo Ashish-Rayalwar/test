@@ -14,6 +14,7 @@ const orderSchema = new mongoose.Schema(
     fileId: {
       type: ObjectId,
       ref: "File",
+      // unique: true,
     },
 
     status: {
@@ -27,19 +28,6 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    //   paymentDetails :{
-    //         card :{
-    //             type:String,
-    //             require:true
-    //         },
-    //         cvv:{
-    //                  type:String,
-    //                  require:true
-    //         },
-    //         expDate:{
-
-    //         }
-    //   }
   },
   { timestamps: true }
 );

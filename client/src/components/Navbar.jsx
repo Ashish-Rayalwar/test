@@ -1,10 +1,30 @@
 import styled from "@emotion/styled";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "react-router-dom";
-import { AppBar, Badge } from "@mui/material";
-import { Refresh, ShoppingCartOutlined } from "@mui/icons-material";
-import React, { useContext } from "react";
-import { CartContext } from "../App";
+import { Link, useNavigate } from "react-router-dom";
+import { AppBar, Badge, IconButton, Tooltip } from "@mui/material";
+
+import {
+  Logout,
+  LogoutOutlined,
+  Refresh,
+  ShoppingCartOutlined,
+} from "@mui/icons-material";
+import React, { Fragment, useContext } from "react";
+import { AuthContext, CartContext } from "../App";
+import axios from "axios";
+import { userApi } from "../api/api";
+// import { Cookies,useCookies } from "react-cookie";
+// const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
+
+export const checkAdmin = () => {
+  let user = localStorage.getItem("user");
+  user = JSON.parse(user);
+  if (user) {
+    if (user.role == "admin") {
+      return true;
+    }
+  }
+};
 
 const logo = require("../images/logo.png");
 const Container = styled(AppBar)`
@@ -87,6 +107,11 @@ const Head3 = styled.h2`
 
 const Navbar = () => {
   const { cart, title, addTitle } = useContext(CartContext);
+
+  const { logout, isLoggedIn } = useContext(AuthContext);
+
+  const isAdmin = checkAdmin();
+
   let map = new Map();
   for (let i = 0; i < cart.length; i++) {
     if (!map.has(cart[i]._id)) {
@@ -94,6 +119,99 @@ const Navbar = () => {
     }
   }
   let size = map.size;
+
+  const navigate = useNavigate();
+
+  const Logout = () => {
+    userApi
+      .post(`/user/logout`, null, {
+        withCredentials: true,
+      })
+      .then((responce) => {
+        console.log(responce.data.message);
+        window.alert(responce.data.message);
+        logout();
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error.responce.data.message);
+      });
+  };
+
+  // <Fragment>
+  //   <MenuItem>
+  //     <Head3>
+  //       <Link
+  //         style={{
+  //           marginTop: "5px",
+  //           textDecoration: "none",
+  //           color: "gray",
+  //         }}
+  //         to="/signup"
+  //       >
+  //         Admin
+  //       </Link>
+  //     </Head3>
+  //   </MenuItem>
+  // </Fragment>
+  const Create = (
+    <Fragment>
+      <Link style={{ textDecoration: "none", margin: "50px" }} to="/create">
+        <button
+          type="button"
+          className="btn"
+          style={{ backgroundColor: "#F4D105" }}
+        >
+          Create
+        </button>
+      </Link>
+      <Link style={{ textDecoration: "none" }} to="/admin">
+        <button
+          type="button"
+          className="btn"
+          style={{ backgroundColor: "#F4D105" }}
+        >
+          Sell
+        </button>
+      </Link>
+    </Fragment>
+  );
+  // const AdminButton = (
+  //   <Fragment>
+
+  //   </Fragment>
+  // );
+
+  const loginAndSignUp = (
+    <Fragment>
+      <MenuItem>
+        <Head3>
+          <Link
+            style={{
+              textDecoration: "none",
+              color: "gray",
+            }}
+            to="/signup"
+          >
+            SignUp
+          </Link>
+        </Head3>
+      </MenuItem>
+      <MenuItem>
+        <Head3>
+          <Link
+            style={{
+              textDecoration: "none",
+              color: "gray",
+            }}
+            to="/login"
+          >
+            LogIn
+          </Link>
+        </Head3>
+      </MenuItem>
+    </Fragment>
+  );
 
   return (
     <Container>
@@ -116,39 +234,30 @@ const Navbar = () => {
           </Logo>
         </Center>
         <Right>
-          <MenuItem>
-            <Head3>
-              <Link
-                style={{
-                  textDecoration: "none",
-                  color: "gray",
-                }}
-                to="/signup"
-              >
-                SignUp
-              </Link>
-            </Head3>
-          </MenuItem>
-          <MenuItem>
-            <Head3>
-              <Link
-                style={{
-                  textDecoration: "none",
-                  color: "gray",
-                }}
-                to="/login"
-              >
-                LogIn
-              </Link>
-            </Head3>
-          </MenuItem>
-          <MenuItem>
-            <Badge badgeContent={size} color="secondary">
-              <Link to="/cart" style={{ textDecoration: "none" }}>
-                <ShoppingCartOutlined style={{ color: "gray" }} />{" "}
-              </Link>
-            </Badge>
-          </MenuItem>
+          {!isLoggedIn ? (
+            loginAndSignUp
+          ) : (
+            <Fragment>
+              <MenuItem>{isAdmin ? Create : null}</MenuItem>
+              <MenuItem>
+                <Tooltip title="logout" onClick={Logout}>
+                  <IconButton>
+                    <LogoutOutlined style={{ color: "gray" }} />
+                  </IconButton>
+                </Tooltip>
+              </MenuItem>
+
+              {!isAdmin ? (
+                <MenuItem>
+                  <Link to="/orders" style={{ textDecoration: "none" }}>
+                    <Language>
+                      <h5>My Orders</h5>
+                    </Language>
+                  </Link>
+                </MenuItem>
+              ) : null}
+            </Fragment>
+          )}
         </Right>
       </Wrapper>
     </Container>
@@ -156,3 +265,11 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+// <MenuItem>
+//             <Badge badgeContent={size} color="secondary">
+//               <Link to="/cart" style={{ textDecoration: "none" }}>
+//                 <ShoppingCartOutlined style={{ color: "gray" }} />{" "}
+//               </Link>
+//             </Badge>
+//           </MenuItem>

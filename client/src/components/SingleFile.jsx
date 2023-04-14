@@ -5,9 +5,11 @@ import styled from "@emotion/styled";
 import { Box, Button, Typography } from "@mui/material";
 
 import Files from "./Files";
-import Navbar from "./Navbar";
+import Navbar, { checkAdmin } from "./Navbar";
 
-import { CartContext } from "../App";
+import { AuthContext, CartContext } from "../App";
+import EditFile from "./EditFile";
+import { fileApi, orderApi } from "../api/api";
 
 const Container = styled(Box)`
   display: flex;
@@ -29,8 +31,9 @@ const Image = styled("img")({
 });
 
 const Details = styled(Typography)`
-  width: 600px;
-  height: 300px;
+  // border: 1px solid black;
+  width: 300px;
+  height: auto;
   margin: 20px 20px;
 `;
 
@@ -51,55 +54,75 @@ const AddToCart = styled(Button)`
 const SingleFile = () => {
   const params = useParams();
   const { addTocart } = useContext(CartContext);
-
-  let url = `http://localhost:5000/api/files/${params.id}`;
-
-  //   if (title) {
-  //     url = `http://localhost:5000/api/files?title=${title}`;
-  //   }
+  // const {user} = useContext(AuthContext)
+  // let url = `http://localhost:5000/api/files/${params.id}`;
 
   const [file, setFile] = useState({});
+  const [order, setOrder] = useState({});
+  var isAdmin = checkAdmin();
   useEffect(() => {
-    axios
-      .get(url)
+    fileApi
+      .get(`/files/${params.id}`)
       .then((response) => {
         console.log(response.data.data);
         setFile(response.data.data);
+        localStorage.setItem("file", JSON.stringify(response.data.data));
       })
       .catch((error) => {
         console.log(error);
       });
-  }, [params.id, url]);
+  }, [params.id]);
 
   let navigate = useNavigate();
-  let orderUrl = `http://localhost:5000/order/file/${params.id}`;
 
-  const [order, setOrder] = useState({});
-  const setFileLocal = () => {
-    localStorage.setItem("file", JSON.stringify(file, null, 2));
-    axios
-      .post(orderUrl, null, { withCredentials: true })
+  // let orderUrl = `http://localhost:5000/order/file/${params.id}`;
+  // let user = localStorage.getItem("user");
+  function createOrder() {
+    // if (!user) {
+    //   navigate("/login");
+    // }
+    orderApi
+      .post(`file/${params.id}`, null, { withCredentials: true })
       .then((response) => {
-        console.log(response.data.data);
         setOrder(response.data.data);
-        localStorage.setItem(
-          "order",
-          JSON.stringify(response.data.data, null, 2)
-        );
-        navigate(`/order`);
+        let orderId = response.data.data._id;
+
+        console.log(response.data.data);
+        navigate(`/order/file/${orderId}`);
       })
       .catch((error) => {
-        // window.alert(error.response.data.message);
-        if (error.response.data.message === "You are not loggedIn") {
+        console.log(error);
+        if (error.response.data.message == "You are not loggedIn") {
           navigate("/login");
         }
         console.log(error.response.data.message);
       });
-  };
+  }
 
+  const DeleteFile = () => {
+    let ok = window.confirm("Do you want to delete this item");
+    if (ok) {
+      fileApi
+        .delete(`/files/${params.id}`, {
+          withCredentials: true,
+        })
+        .then((responce) => {
+          console.log(responce.data.message);
+          if (responce.data.message == "file deleted successfully") {
+            navigate("/");
+          }
+        })
+        .catch((error) => {
+          console.log(error.response.data.message);
+        });
+    }
+  };
+  // <Navbar />
+  // const isAdmin = true;
+
+  console.log(isAdmin);
   return (
     <Container>
-      <Navbar />
       <Title>{file.title}</Title>
 
       <br />
@@ -109,7 +132,7 @@ const SingleFile = () => {
       <Title>{file.title} 3D Model Free Download high quality design.</Title>
 
       <Details>Details :- {file.description}</Details>
-      <br />
+
       <br />
 
       <Title>File Size :- {file.fileSize}mb</Title>
@@ -119,13 +142,19 @@ const SingleFile = () => {
       <br />
 
       <ButtonContainer>
-        <AddToCart onClick={() => addTocart(file)} variant="contained">
-          AddToCart
-        </AddToCart>
-
-        <AddToCart onClick={setFileLocal} variant="contained">
+        <AddToCart onClick={createOrder} variant="contained">
           BuyNow
         </AddToCart>
+        {isAdmin ? (
+          <>
+            <Link style={{ textDecoration: "none" }} to={`/edit/${params.id}`}>
+              <AddToCart variant="contained">Edit</AddToCart>
+            </Link>
+            <AddToCart onClick={DeleteFile} variant="contained">
+              Delete
+            </AddToCart>
+          </>
+        ) : null}
       </ButtonContainer>
       <br />
 

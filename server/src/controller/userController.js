@@ -1,3 +1,4 @@
+const orderModel = require("../models/orderModel");
 const userModel = require("../models/userModel");
 require("dotenv").config();
 const {
@@ -109,13 +110,21 @@ const loginUser = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+  // let token = req.cookies.token;
+  // await Token.deleteOne({ token: token })
+  let userId = req.tokenDetails.userId;
+  await orderModel.deleteMany(
+    { userId: userId, status: "pending" },
+    { new: true }
+  );
+
   res
     .clearCookie("token", {
       sameSite: "none",
       secure: true,
     })
     .status(200)
-    .send("User has been logged out.");
+    .send({ message: "User has been logged out." });
 };
 
 module.exports = { signupUser, loginUser, createAdmin, logout };

@@ -4,6 +4,7 @@ require("dotenv").config();
 const verifyToken = async (req, res, next) => {
   try {
     const token = req.cookies.token;
+
     // console.log(token);
     if (!token)
       return res
@@ -33,11 +34,12 @@ const AdminAuthorization = async (req, res, next) => {
   try {
     verifyToken(req, res, async () => {
       let fileId = req.params.fileId;
-      console.log(req.tokenDetails);
+      // console.log(req.tokenDetails);
       if (fileId) {
         if (!mongoose.isValidObjectId(fileId))
           return res.status(400).json({ message: "Given FileId is not valid" });
       }
+      console.log(req.tokenDetails.role);
       if (req.tokenDetails.role == "admin") {
         next();
       } else {
@@ -60,7 +62,7 @@ const verifyTokenAndAuthorization = async (req, res, next) => {
       if (!mongoose.isValidObjectId(fileId))
         return res.status(400).json({ message: "Given FileId is not valid" });
       //   let userId = req.params.userId;
-      console.log(req.tokenDetails.userId, "jno");
+      // console.log(req.tokenDetails.userId, "jno");
       if (req.tokenDetails.userId) {
         next();
       } else {

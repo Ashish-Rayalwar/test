@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./login.css";
 import { Box, TextField, Button, styled, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../App";
+import { userApi } from "../api/api";
 
 const LogoImg = require("../images/logo.png");
 const Container = styled(Box)`
@@ -58,6 +60,7 @@ const SignupButton = styled(Button)`
 
 const Login = () => {
   const [error, setError] = useState("");
+  const { loginScuccess } = useContext(AuthContext);
   const navigate = useNavigate();
 
   function handleSubmit(e) {
@@ -66,13 +69,14 @@ const Login = () => {
     const userCredentials = Object.fromEntries(formData);
     console.log(formData);
     setError("");
-    axios
-      .post("http://localhost:5000/api/accounts/login", userCredentials, {
+    userApi
+      .post("/login", userCredentials, {
         withCredentials: true,
       })
       .then((response) => {
         console.log(response.data.data);
-        window.alert(response.data.message);
+        // window.alert(response.data.message);
+        loginScuccess(response.data.data);
         navigate("/");
       })
       .catch((error) => {

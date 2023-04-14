@@ -3,6 +3,8 @@ import "./login.css";
 import { Box, TextField, Button, styled, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { userApi } from "../api/api";
+
 const LogoImg = require("../images/logo.png");
 const Container = styled(Box)`
   box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px,
@@ -65,8 +67,8 @@ const SignUp = () => {
     const userCredentials = Object.fromEntries(formData);
     console.log(formData);
     setError("");
-    axios
-      .post("http://localhost:5000/api/accounts/signup", userCredentials)
+    userApi
+      .post("/signup", userCredentials)
       .then((response) => {
         console.log(response.data.data);
         window.alert(response.data.message);
